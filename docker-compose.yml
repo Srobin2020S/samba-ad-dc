@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   dc1:
     image: samba:almalinux
@@ -7,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/almalinux
-      args:
-        SMB_VERSION: "${SMB_VERSION:-latest}"
     container_name: dc1
     hostname: DC1
     privileged: true
@@ -29,9 +25,11 @@ services:
       - "DC2 DC2.dgs.net:172.16.238.20"
       - "DC3 DC3.dgs.net:172.16.238.30"
       - "DC4 DC4.dgs.net:172.16.238.40"
-    command: bash -c "samba-domain-provision && samba -F"
+    command: ["/bin/bash", "-c", "samba-domain-provision && samba -F"]
     volumes:
-      - dc1-local-samba:/usr/local/samba
+      - dc1_etc:/usr/local/samba/etc
+      - dc1_private:/usr/local/samba/private
+      - dc1_var:/usr/local/samba/var
 
     networks:
       static-network:
@@ -43,8 +41,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/ubuntu
-      args:
-        SMB_VERSION: "${SMB_VERSION:-latest}"
     container_name: dc2
     hostname: DC2
     privileged: true
@@ -65,9 +61,11 @@ services:
       - "DC2 DC2.dgs.net:172.16.238.20"
       - "DC3 DC3.dgs.net:172.16.238.30"
       - "DC4 DC4.dgs.net:172.16.238.40"
-    command: bash -c "samba-domain-join DC1 && samba -F"
+    command: ["/bin/bash", "-c", "samba-domain-join DC1 && samba -F"]
     volumes:
-      - dc2-local-samba:/usr/local/samba
+      - dc2_etc:/usr/local/samba/etc
+      - dc2_private:/usr/local/samba/private
+      - dc2_var:/usr/local/samba/var
     networks:
       static-network:
         ipv4_address: 172.16.238.20
@@ -78,8 +76,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/rockylinux
-      args:
-        SMB_VERSION: "${SMB_VERSION:-latest}"
     container_name: dc3
     hostname: DC3
     privileged: true
@@ -100,9 +96,11 @@ services:
       - "DC2 DC2.dgs.net:172.16.238.20"
       - "DC3 DC3.dgs.net:172.16.238.30"
       - "DC4 DC4.dgs.net:172.16.238.40"
-    command: bash -c "samba-domain-join DC1 && samba -F"
+    command: ["/bin/bash", "-c", "samba-domain-join DC1 && samba -F"]
     volumes:
-      - dc3-local-samba:/usr/local/samba
+      - dc3_etc:/usr/local/samba/etc
+      - dc3_private:/usr/local/samba/private
+      - dc3_var:/usr/local/samba/var
     networks:
       static-network:
         ipv4_address: 172.16.238.30
@@ -113,8 +111,6 @@ services:
     build:
       context: .
       dockerfile: dockerfiles/debian
-      args:
-        SMB_VERSION: "${SMB_VERSION:-latest}"
     container_name: dc4
     hostname: DC4
     privileged: true
@@ -135,18 +131,28 @@ services:
       - "DC2 DC2.dgs.net:172.16.238.20"
       - "DC3 DC3.dgs.net:172.16.238.30"
       - "DC4 DC4.dgs.net:172.16.238.40"
-    command: bash -c "samba-domain-join DC1 && samba -F"
+    command: ["/bin/bash", "-c", "samba-domain-join DC1 && samba -F"]
     volumes:
-      - dc4-local-samba:/usr/local/samba
+      - dc4_etc:/usr/local/samba/etc
+      - dc4_private:/usr/local/samba/private
+      - dc4_var:/usr/local/samba/var
     networks:
       static-network:
         ipv4_address: 172.16.238.40
 
 volumes:
-  dc1-local-samba:
-  dc2-local-samba:
-  dc3-local-samba:
-  dc4-local-samba:
+  dc1_etc:
+  dc1_private:
+  dc1_var:
+  dc2_etc:
+  dc2_private:
+  dc2_var:
+  dc3_etc:
+  dc3_private:
+  dc3_var:
+  dc4_etc:
+  dc4_private:
+  dc4_var:
 
 
 networks:
